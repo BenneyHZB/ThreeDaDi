@@ -1,0 +1,2 @@
+# ThreeDaDi
+XiuXianIdleGame
