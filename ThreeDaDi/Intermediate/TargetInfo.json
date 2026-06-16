@@ -1,0 +1,14 @@
+{
+	"Targets": [
+		{
+			"Name": "ThreeDaDi",
+			"Path": "..\\Source\\ThreeDaDi.Target.cs",
+			"Type": "Game"
+		},
+		{
+			"Name": "ThreeDaDiEditor",
+			"Path": "..\\Source\\ThreeDaDiEditor.Target.cs",
+			"Type": "Editor"
+		}
+	]
+}

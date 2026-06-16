@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <None Include="..\..\ThreeDaDi.uproject" />
+    <Filter Include="Source">
+      <UniqueIdentifier>{F31BBDD1-B3E8-3BCC-9652-680E16935819}</UniqueIdentifier>
+    </Filter>
+    <None Include="..\..\Source\ThreeDaDi.Target.cs">
+      <Filter>Source</Filter>
+    </None>
+    <None Include="..\..\Source\ThreeDaDiEditor.Target.cs">
+      <Filter>Source</Filter>
+    </None>
+    <None Include="..\..\.vsconfig" />
+    <Filter Include="Config">
+      <UniqueIdentifier>{FA535FFB-25E1-3D20-B416-52F9BE21E06E}</UniqueIdentifier>
+    </Filter>
+    <None Include="..\..\Config\DefaultEditor.ini">
+      <Filter>Config</Filter>
+    </None>
+    <None Include="..\..\Config\DefaultEngine.ini">
+      <Filter>Config</Filter>
+    </None>
+    <None Include="..\..\Config\DefaultGame.ini">
+      <Filter>Config</Filter>
+    </None>
+    <None Include="..\..\Config\DefaultInput.ini">
+      <Filter>Config</Filter>
+    </None>
+    <Filter Include="Source\ThreeDaDi">
+      <UniqueIdentifier>{A19B0A26-5DAA-39A9-9ABE-358D40CD517F}</UniqueIdentifier>
+    </Filter>
+    <None Include="..\..\Source\ThreeDaDi\ThreeDaDi.Build.cs">
+      <Filter>Source\ThreeDaDi</Filter>
+    </None>
+    <ClCompile Include="..\..\Source\ThreeDaDi\ThreeDaDi.cpp">
+      <Filter>Source\ThreeDaDi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\ThreeDaDi\ThreeDaDi.h">
+      <Filter>Source\ThreeDaDi</Filter>
+    </ClCompile>
+    <Filter Include="Source\ThreeDaDi\Game">
+      <UniqueIdentifier>{CB1E71AD-7276-320D-922B-7DDA5FDA87C7}</UniqueIdentifier>
+    </Filter>
+    <ClCompile Include="..\..\Source\ThreeDaDi\Game\XiuxianIdleCameraPawn.cpp">
+      <Filter>Source\ThreeDaDi\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\ThreeDaDi\Game\XiuxianIdleCameraPawn.h">
+      <Filter>Source\ThreeDaDi\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\ThreeDaDi\Game\XiuxianIdleGameMode.cpp">
+      <Filter>Source\ThreeDaDi\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\ThreeDaDi\Game\XiuxianIdleGameMode.h">
+      <Filter>Source\ThreeDaDi\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\ThreeDaDi\Game\XiuxianIdleHUD.cpp">
+      <Filter>Source\ThreeDaDi\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\ThreeDaDi\Game\XiuxianIdleHUD.h">
+      <Filter>Source\ThreeDaDi\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\ThreeDaDi\Game\XiuxianIdlePlayerController.cpp">
+      <Filter>Source\ThreeDaDi\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\ThreeDaDi\Game\XiuxianIdlePlayerController.h">
+      <Filter>Source\ThreeDaDi\Game</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

@@ -1,0 +1,15 @@
+{
+    "Version": "1.2",
+    "Data": {
+        "Source": "d:\\ue_projects\\threedadi\\intermediate\\build\\win64\\unrealeditor\\inc\\threedadi\\uht\\xiuxianidleplayercontroller.gen.cpp",
+        "ProvidedModule": "",
+        "PCH": "d:\\ue_projects\\threedadi\\intermediate\\build\\win64\\x64\\threedadieditor\\debuggame\\unrealed\\sharedpch.unrealed.project.nonoptimized.valapi.cpp20.h.pch",
+        "Includes": [
+            "d:\\ue_projects\\threedadi\\intermediate\\build\\win64\\x64\\unrealeditor\\debuggame\\threedadi\\definitions.threedadi.h",
+            "d:\\ue_projects\\threedadi\\source\\threedadi\\game\\xiuxianidleplayercontroller.h",
+            "d:\\ue_projects\\threedadi\\intermediate\\build\\win64\\unrealeditor\\inc\\threedadi\\uht\\xiuxianidleplayercontroller.generated.h"
+        ],
+        "ImportedModules": [],
+        "ImportedHeaderUnits": []
+    }
+}
