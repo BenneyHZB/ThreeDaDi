@@ -1,0 +1,333 @@
+<html xmlns:o="urn:schemas-microsoft-com:office:office"
+xmlns:w="urn:schemas-microsoft-com:office:word"
+xmlns="http://www.w3.org/TR/REC-html40">
+<head>
+<meta charset="utf-8">
+<title>ThreeDaDi 现有功能文档</title>
+<style>
+body { font-family: 宋体, SimSun, serif; font-size: 12pt; line-height: 1.6; margin: 2cm; }
+h1 { font-size: 22pt; font-weight: bold; text-align: center; margin-bottom: 24pt; }
+h2 { font-size: 16pt; font-weight: bold; margin-top: 18pt; margin-bottom: 8pt; border-bottom: 1px solid #333; padding-bottom: 4pt; }
+h3 { font-size: 14pt; font-weight: bold; margin-top: 14pt; margin-bottom: 6pt; }
+h4 { font-size: 12pt; font-weight: bold; margin-top: 10pt; margin-bottom: 4pt; }
+p { margin: 6pt 0; }
+ul, ol { margin: 6pt 0 6pt 24pt; }
+li { margin: 3pt 0; }
+.meta { text-align: center; color: #666; margin-bottom: 24pt; }
+.note { background: #f5f5f5; padding: 8pt; border-left: 3pt solid #999; margin: 8pt 0; }
+table { border-collapse: collapse; width: 100%; margin: 8pt 0; }
+td, th { border: 1px solid #999; padding: 6pt 8pt; vertical-align: top; }
+th { background: #eee; font-weight: bold; }
+.code { font-family: Consolas, monospace; font-size: 10pt; background: #f8f8f8; padding: 8pt; white-space: pre-wrap; }
+</style>
+</head>
+<body>
+
+<h1>ThreeDaDi —— 2D 修仙放置游戏<br>现有功能文档</h1>
+
+<p class="meta">
+引擎版本：Unreal Engine 5.5<br>
+项目类型：2D 修仙放置（Paper2D + PaperZD）<br>
+开发模块：ThreeDaDi（C++ + 蓝图）<br>
+文档日期：2026-06-17
+</p>
+
+<h2>一、项目概述</h2>
+
+<p>本项目是一个 <b>2D 修仙放置游戏</b> 的基础框架，目前已完成以下内容：</p>
+
+<ul>
+<li>角色与组件架构（行动状态、数值、放置玩法）</li>
+<li>PaperZD 2D 动画实例基类（自动同步行动状态）</li>
+<li>主界面 HUD 框架（血条、经验条、寿元条、状态文字、行为按钮、日志）</li>
+<li>基础放置玩法（打坐涨经验、战斗涨经验并掉血、寿元随时间增长、行为日志）</li>
+<li>Demo 场景支持（俯视正交摄像机、鼠标投射、调试 HUD）</li>
+</ul>
+
+<p><b>尚未实现：</b>正式关卡流程、存档系统、探索/空闲的数值收益、死亡复活、DataTable 配置、完整美术资源等。</p>
+
+<h2>二、项目结构</h2>
+
+<div class="code">ThreeDaDi/
+├── Config/
+│   └── DefaultEngine.ini          （默认 GameMode、启动地图等）
+├── Source/ThreeDaDi/
+│   ├── Character/                 （角色与核心组件）
+│   ├── Game/                      （Demo 用 GameMode / PC / 摄像机 / 调试 HUD）
+│   ├── UI/                        （主界面 UMG 基类）
+│   └── ThreeDaDi.Build.cs
+├── Content/                       （蓝图、地图、美术资源，需在编辑器中创建）
+├── Docs/                          （项目文档）
+└── ThreeDaDi.uproject</div>
+
+<p><b>已启用插件：</b></p>
+<ul>
+<li>PaperZD（2D 动画蓝图，Marketplace 插件）</li>
+<li>ModelingToolsEditorMode</li>
+</ul>
+
+<h2>三、核心架构</h2>
+
+<p>整体数据流如下（自上而下）：</p>
+
+<ol>
+<li><b>WBP_MainHUD（UMG 主界面）</b>：血条 / 经验条 / 寿元条 / 状态文字 / 按钮 / 日志</li>
+<li><b>PlayerController</b>：创建主 HUD、解析「逻辑主角」、处理输入</li>
+<li><b>AXiuxianCharacterBase（角色基类）</b>：挂载三大核心组件</li>
+<li><b>UXiuxianPaperZDAnimInstance（AnimBP 基类）</b>：读取 ActionState 驱动 2D 动画</li>
+</ol>
+
+<p><b>角色身上的三大组件：</b></p>
+<ul>
+<li><b>ActionComponent</b> —— 行动状态（Idle / 修炼 / 探索 / 战斗 / 死亡）</li>
+<li><b>CharacterStatsComponent</b> —— 血量 / 经验 / 等级 / 寿元</li>
+<li><b>IdleBehaviorComponent</b> —— 放置玩法 Timer + 行为日志</li>
+</ul>
+
+<p><b>设计原则：</b></p>
+<ul>
+<li>数据在 Component，UI 只订阅委托、发命令，不存玩法逻辑</li>
+<li>PlayerController 负责创建主 HUD、解析主角（尤其 Demo 仍用摄像机 Pawn 时）</li>
+<li>C++ 提供基类框架，WBP 负责布局与美术</li>
+</ul>
+
+<h2>四、角色系统</h2>
+
+<h3>4.1 AXiuxianCharacterBase（角色基类）</h3>
+
+<table>
+<tr><th width="25%">项目</th><th>说明</th></tr>
+<tr><td>继承</td><td>APaperZDCharacter</td></tr>
+<tr><td>性质</td><td>抽象类，不可直接放置，需蓝图继承</td></tr>
+<tr><td>挂载组件</td><td>ActionComponent、CharacterStatsComponent、IdleBehaviorComponent</td></tr>
+<tr><td>用途</td><td>玩家、怪物、传承角色等所有可行动 2D 角色的 C++ 根类</td></tr>
+</table>
+
+<h3>4.2 EActionState（行动状态枚举）</h3>
+
+<table>
+<tr><th width="25%">值</th><th>含义</th></tr>
+<tr><td>Idle</td><td>空闲</td></tr>
+<tr><td>Meditating</td><td>打坐 / 修炼</td></tr>
+<tr><td>Exploring</td><td>探索</td></tr>
+<tr><td>Fighting</td><td>战斗</td></tr>
+<tr><td>Dead</td><td>死亡</td></tr>
+</table>
+
+<p>蓝图可用（UENUM BlueprintType）。</p>
+
+<h3>4.3 UActionComponent（行动组件）</h3>
+
+<p><b>职责：</b>存储并广播当前行动状态。</p>
+
+<table>
+<tr><th width="40%">接口 / 委托</th><th>说明</th></tr>
+<tr><td>SetActionState(EActionState)</td><td>设置状态，相同则跳过、不重复广播</td></tr>
+<tr><td>GetActionState()</td><td>获取当前状态</td></tr>
+<tr><td>OnActionStateChanged(OldState, NewState)</td><td>状态变化委托，供 UI / 动画 / 玩法订阅</td></tr>
+</table>
+
+<h3>4.4 UCharacterStatsComponent（数值组件）</h3>
+
+<p><b>职责：</b>存储角色数值，变化时广播委托。</p>
+
+<p><b>属性（默认值）：</b></p>
+<table>
+<tr><th width="30%">属性</th><th width="20%">默认值</th><th>说明</th></tr>
+<tr><td>Health / MaxHealth</td><td>100 / 100</td><td>血量</td></tr>
+<tr><td>Exp / MaxExp</td><td>0 / 100</td><td>经验</td></tr>
+<tr><td>Level</td><td>1</td><td>等级</td></tr>
+<tr><td>Lifespan / MaxLifespan</td><td>0 / 100</td><td>寿元进度</td></tr>
+</table>
+
+<p><b>主要接口：</b></p>
+<ul>
+<li>SetHealth / SetExp / SetLevel / SetLifespan 等 —— 直接设置</li>
+<li>AddExp(Amount) —— 加经验，满则升级（下一级 MaxExp × 1.25）</li>
+<li>ApplyDamage(Amount) —— 扣血</li>
+<li>AddLifespan(Amount) —— 加寿元</li>
+</ul>
+
+<p><b>委托：</b>OnHealthChanged、OnExpChanged、OnLevelChanged、OnLifespanChanged</p>
+
+<h3>4.5 UXiuxianIdleBehaviorComponent（放置玩法组件）</h3>
+
+<p><b>职责：</b>按行动状态驱动 Timer，修改 Stats，输出行为日志。</p>
+
+<table>
+<tr><th width="18%">行为</th><th width="35%">规则（默认值）</th><th>可调参数</th></tr>
+<tr><td>打坐</td><td>每 10 秒 +1 经验</td><td>MeditateExpInterval, MeditateExpGain</td></tr>
+<tr><td>战斗</td><td>每 5 秒 +2 经验，扣 8 血</td><td>FightExpInterval, FightExpGain, FightHealthLoss</td></tr>
+<tr><td>寿元</td><td>每 20 秒 +1（死亡后停止）</td><td>LifespanGainInterval, LifespanGainAmount</td></tr>
+<tr><td>日志</td><td>每 4~9 秒随机一条；切换状态时发开场白</td><td>LogMinInterval, LogMaxInterval</td></tr>
+<tr><td>战斗日志</td><td>每次战斗结算 45% 概率额外刷一条</td><td>FightLogChanceOnTick</td></tr>
+<tr><td>死亡</td><td>血量 ≤ 0 自动切 Dead 状态</td><td>—</td></tr>
+</table>
+
+<p><b>日志文案库：</b>每个状态内置 4~5 条中文文案（Idle / 打坐 / 探索 / 战斗 / 死亡）。</p>
+
+<p><b>委托：</b>OnGameplayLogAdded(FText LogMessage) → 主 UI 日志区显示</p>
+
+<h3>4.6 UXiuxianPaperZDAnimInstance（AnimBP 基类）</h3>
+
+<p><b>职责：</b>从主角 ActionComponent 自动同步 ActionState 到 AnimBP 变量。</p>
+
+<table>
+<tr><th width="35%">变量 / 接口</th><th>说明</th></tr>
+<tr><td>ActionState</td><td>蓝图只读，供状态机 / Select By Enum 切 Flipbook</td></tr>
+<tr><td>GetActionState()</td><td>蓝图纯函数</td></tr>
+<tr><td>同步方式</td><td>OnInit 绑定委托 + OnTick 兜底重试</td></tr>
+</table>
+
+<p><b>用法：</b>创建 PaperZD Animation Blueprint，父类选 XiuxianPaperZDAnimInstance，在 AnimGraph 里读 ActionState 驱动动画。</p>
+
+<h2>五、UI 系统</h2>
+
+<h3>5.1 UXiuxianMainHUDWidget（主界面 C++ 基类）</h3>
+
+<p>供 WBP_MainHUD 继承。WBP 中控件<b>命名必须与下表一致</b>（BindWidget）：</p>
+
+<table>
+<tr><th width="35%">控件名</th><th>用途</th></tr>
+<tr><td>ProgressBar_Health</td><td>血条</td></tr>
+<tr><td>ProgressBar_Experience</td><td>经验条</td></tr>
+<tr><td>ProgressBar_Lifespan</td><td>寿元条</td></tr>
+<tr><td>TextBlock_ActionState</td><td>当前状态文字</td></tr>
+<tr><td>TextBlock_Level</td><td>等级（可选）</td></tr>
+<tr><td>TextBlock_Log</td><td>行为日志</td></tr>
+<tr><td>Button_Idle</td><td>空闲按钮</td></tr>
+<tr><td>Button_Meditate</td><td>打坐按钮</td></tr>
+<tr><td>Button_Explore</td><td>探索按钮</td></tr>
+<tr><td>Button_Fight</td><td>战斗按钮</td></tr>
+</table>
+
+<p><b>功能：</b></p>
+<ul>
+<li>按钮点击 → RequestSetActionState → 主角 ActionComponent</li>
+<li>订阅 Stats / Action / Behavior 委托，自动刷新条和文字</li>
+<li>日志区最多 12 行，超出删最旧</li>
+</ul>
+
+<p><b>WBP 创建步骤：</b></p>
+<ol>
+<li>内容浏览器 → User Interface → Widget Blueprint</li>
+<li>父类：XiuxianMainHUDWidget</li>
+<li>命名：WBP_MainHUD</li>
+<li>按上表摆控件并命名</li>
+</ol>
+
+<h3>5.2 PlayerController 与 HUD 创建</h3>
+
+<p><b>AXiuxianIdlePlayerController 功能：</b></p>
+
+<table>
+<tr><th width="35%">功能</th><th>说明</th></tr>
+<tr><td>MainHUDWidgetClass</td><td>指定 WBP_MainHUD</td></tr>
+<tr><td>CreateMainHUD()</td><td>BeginPlay 时 AddToViewport</td></tr>
+<tr><td>GetProtagonistCharacter()</td><td>获取逻辑主角</td></tr>
+<tr><td>ProtagonistOverride</td><td>当 Pawn 是摄像机时，手动指定主角</td></tr>
+<tr><td>鼠标</td><td>显示光标，GameAndUI 输入模式</td></tr>
+<tr><td>ProjectMouseToWorldPlane</td><td>屏幕坐标 → 世界 XY 平面（2D 点选基础）</td></tr>
+</table>
+
+<h2>六、Demo / 场景系统（Game 目录）</h2>
+
+<table>
+<tr><th width="35%">类名</th><th>说明</th></tr>
+<tr><td>AXiuxianIdleGameMode</td><td>默认 GameMode，绑定 PC / HUD / 摄像机 Pawn</td></tr>
+<tr><td>AXiuxianIdleCameraPawn</td><td>2D 俯视正交摄像机（Pitch=-90°，OrthoWidth=2048）</td></tr>
+<tr><td>AXiuxianIdlePlayerController</td><td>玩家控制器（见上文 UI 部分）</td></tr>
+<tr><td>AXiuxianIdleHUD</td><td>Canvas 调试 HUD，显示鼠标屏幕/世界坐标（非正式 UI）</td></tr>
+</table>
+
+<p><b>DefaultEngine.ini 配置：</b></p>
+<ul>
+<li>GlobalDefaultGameMode = XiuxianIdleGameMode</li>
+<li>EditorStartupMap = Level01（若已创建）</li>
+</ul>
+
+<h2>七、数据流速查</h2>
+
+<h3>7.1 按钮切状态</h3>
+<div class="code">按钮 OnClicked
+  → MainHUD::RequestSetActionState
+    → ActionComponent::SetActionState
+      → OnActionStateChanged
+        → AnimInstance 更新 ActionState
+        → MainHUD 更新状态文字
+        → IdleBehavior 启停 Timer</div>
+
+<h3>7.2 打坐涨经验</h3>
+<div class="code">状态 = Meditating
+  → 每 10s Timer
+    → StatsComponent::AddExp(1)
+      → OnExpChanged → 经验条刷新
+      → 满经验 → Level++ → OnLevelChanged</div>
+
+<h3>7.3 战斗</h3>
+<div class="code">状态 = Fighting
+  → 每 5s Timer
+    → AddExp(2) + ApplyDamage(8)
+      → 血 ≤ 0 → SetActionState(Dead)
+      → 45% 概率刷战斗日志</div>
+
+<h3>7.4 寿元</h3>
+<div class="code">全局 Timer（非死亡时）
+  → 每 20s AddLifespan(1)
+    → OnLifespanChanged → 寿元条刷新</div>
+
+<h3>7.5 行为日志</h3>
+<div class="code">切换状态 → 开场日志
+Timer 4~9s → 从当前状态文案库随机一条
+  → OnGameplayLogAdded
+    → MainHUD::TextBlock_Log 追加显示</div>
+
+<h2>八、编辑器配置清单</h2>
+
+<p>运行前请确认以下项目：</p>
+
+<ol>
+<li>已安装 UE 5.5、PaperZD 插件</li>
+<li>创建主角蓝图（父类 XiuxianCharacterBase）</li>
+<li>创建 WBP_MainHUD（父类 XiuxianMainHUDWidget），控件命名正确</li>
+<li>PC 蓝图设置 Main HUD Widget Class = WBP_MainHUD</li>
+<li>关卡中放置主角，PC 的 Protagonist Override 指向主角（若仍用摄像机 Pawn）</li>
+<li>（可选）创建 PaperZD AnimBP，父类 XiuxianPaperZDAnimInstance，挂到角色</li>
+</ol>
+
+<h2>九、源码文件一览</h2>
+
+<table>
+<tr><th width="55%">文件路径</th><th>类 / 内容</th></tr>
+<tr><td>Character/EActionState.h</td><td>行动状态枚举</td></tr>
+<tr><td>Character/ActionComponent</td><td>行动状态组件</td></tr>
+<tr><td>Character/CharacterStatsComponent</td><td>数值组件</td></tr>
+<tr><td>Character/XiuxianIdleBehaviorComponent</td><td>放置玩法 + 日志</td></tr>
+<tr><td>Character/XiuxianCharacterBase</td><td>角色基类</td></tr>
+<tr><td>Character/XiuxianPaperZDAnimInstance</td><td>AnimBP 基类</td></tr>
+<tr><td>UI/XiuxianMainHUDWidget</td><td>主界面 UMG 基类</td></tr>
+<tr><td>Game/XiuxianIdleGameMode</td><td>Demo GameMode</td></tr>
+<tr><td>Game/XiuxianIdleCameraPawn</td><td>俯视摄像机</td></tr>
+<tr><td>Game/XiuxianIdlePlayerController</td><td>玩家控制器</td></tr>
+<tr><td>Game/XiuxianIdleHUD</td><td>调试 HUD（Canvas）</td></tr>
+</table>
+
+<h2>十、后续可扩展方向</h2>
+
+<ol>
+<li>探索 / 空闲状态的数值收益</li>
+<li>死亡复活、寿元耗尽逻辑</li>
+<li>日志 / 数值改 DataTable 配置</li>
+<li>存档（GameInstance / SaveGame）</li>
+<li>正式关卡与 DefaultPawn 改为主角 Character</li>
+<li>UMG 替代 AHUD 调试文字</li>
+<li>怪物 / 传承角色继承 XiuxianCharacterBase</li>
+</ol>
+
+<p class="meta" style="margin-top:36pt;">
+—— 文档结束 ——<br>
+基于 ThreeDaDi 项目当前代码库整理
+</p>
+
+</body>
+</html>
